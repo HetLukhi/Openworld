@@ -72,3 +72,10 @@ Plugins/**/Intermediate/*
 
 # Cache files for the editor to use
 DerivedDataCache/*
+
+# Custom storage folder for extra/future assets
+Assets/
+
+# Ignore Unreal auto-generated Content subfolders
+Content/Collections/
+Content/Developers/
