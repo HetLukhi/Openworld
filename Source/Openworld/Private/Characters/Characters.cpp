@@ -9,6 +9,7 @@
 #include "GroomComponent.h"
 #include "Items/Item.h"
 #include "Items/Weapons/Weapon.h"
+#include "Components/BoxComponent.h"
 #include "Animation/AnimMontage.h"
 
 ACharacters::ACharacters()
@@ -322,5 +323,13 @@ void ACharacters::SetupPlayerInputComponent(UInputComponent* PlayerInputComponen
 		EnhancedInputComponent->BindAction(CharacterEquipAction, ETriggerEvent::Started, this, &ACharacters::Equip);
 		EnhancedInputComponent->BindAction(CharacterAttackAction, ETriggerEvent::Started, this, &ACharacters::Attack);
 		EnhancedInputComponent->BindAction(CharacterDodgeAction, ETriggerEvent::Started, this, &ACharacters::Dodge);
+	}
+}
+
+void ACharacters::SetWeaponCollisionEnable(ECollisionEnabled::Type CollisionEnable)
+{
+	if (EquippedWeapon && EquippedWeapon->GetWeaponBox())
+	{
+		EquippedWeapon->GetWeaponBox()->SetCollisionEnabled(CollisionEnable);
 	}
 }
