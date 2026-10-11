@@ -19,6 +19,8 @@ public:
 	void Equip(USceneComponent* InParent, FName InSocketName);
 	void AttachMeahToSocket(USceneComponent* InParent, const FName& InSocketName);
 
+	TArray<AActor*> IgnoreActor;
+
 	FORCEINLINE UBoxComponent* GetWeaponBox() const { return WeaponBox; }
 protected:
 	virtual void BeginPlay() override;

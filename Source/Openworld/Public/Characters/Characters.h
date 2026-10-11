@@ -93,7 +93,7 @@ protected:
 	bool CanDisArm();
 
 	void PlayAttackMontage();
-	void PlayEquipMontage(FName SectionName);
+	void PlayEquipMontage(const FName& SectionName);
 	void PlayDodgeMontage();
 
 	UPROPERTY(EditDefaultsOnly)
