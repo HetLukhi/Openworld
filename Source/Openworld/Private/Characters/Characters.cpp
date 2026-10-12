@@ -59,7 +59,19 @@ void ACharacters::BeginPlay()
 
 void ACharacters::AttackEnd()
 {
-	ActionState = EActionState::EAS_Unoccupied;
+	if (bComboQueued)
+	{
+		bComboQueued = false;
+		ComboStep++;
+
+		PlayAttackMontage();
+	}
+	else
+	{
+		ActionState = EActionState::EAS_Unoccupied;
+		ComboStep = 0;
+		bComboQueued = false;
+	}
 }
 
 void ACharacters::EquipEnd()
@@ -191,8 +203,19 @@ void ACharacters::Equip()
 
 void ACharacters::Attack()
 {
+	if (ActionState == EActionState::EAS_Attacking)
+	{
+		if (bCanQueueCombo && ComboStep < 3)
+		{
+			bComboQueued = true;
+		}
+		return;
+	}
 	if (CanAttack())
 	{
+		ComboStep = 1;
+		bCanQueueCombo = false;
+
 		PlayAttackMontage();
 		ActionState = EActionState::EAS_Attacking;
 	}
@@ -251,16 +274,21 @@ void ACharacters::PlayAttackMontage()
 	UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
 	if (AnimInstance && AttackMontage)
 	{
-		AnimInstance->Montage_Play(AttackMontage, 1.75f);
-		const int32 Selection = FMath::RandRange(0, 1);
-		FName SelectionName = FName();
-		switch (Selection)
+		if (!AnimInstance->Montage_IsPlaying(AttackMontage))
 		{
-		case 0:
+			AnimInstance->Montage_Play(AttackMontage, 1.75f);
+		}
+		FName SelectionName = FName();
+		switch (ComboStep)
+		{
+		case 1:
 			SelectionName = FName("Attack1");
 			break;
-		case 1:
+		case 2:
 			SelectionName = FName("Attack2");
+			break;
+		case 3:
+			SelectionName = FName("Attack3");
 			break;
 		default:
 			break;

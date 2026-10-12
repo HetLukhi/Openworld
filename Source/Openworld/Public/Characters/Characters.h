@@ -154,7 +154,17 @@ private:
 	float DodgeTime = 0.0f;
 
 	FVector DodgeDirection = FVector::ZeroVector;
+
+	int32 ComboStep = 0;
+
+	bool bComboQueued = false;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Combat", meta = (AllowPrivateAccess = "true"))
+	bool bCanQueueCombo = false;
 public: 
 	FORCEINLINE void SetOverlappingItem(AItem* Item) { OverlappingItem = Item; }
 	FORCEINLINE ECharacterState GetCharacterState() const { return CharacterState; }
+	
+	UFUNCTION(BlueprintCallable)
+	FORCEINLINE void SetCanQueueCombo(bool Status) { bCanQueueCombo = Status; }
 };
