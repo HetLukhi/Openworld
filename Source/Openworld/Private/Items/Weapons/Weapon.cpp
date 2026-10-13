@@ -8,6 +8,7 @@
 #include "Kismet/GameplayStatics.h"
 #include "Kismet/KismetSystemLibrary.h"
 #include "Interfaces/HitInterface.h"
+#include "Field/FieldSystemComponent.h"
 
 AWeapon::AWeapon()
 {
@@ -23,6 +24,9 @@ AWeapon::AWeapon()
 
 	BoxTraceEnd = CreateDefaultSubobject<USceneComponent>(FName("Box Trace End"));
 	BoxTraceEnd->SetupAttachment(GetRootComponent());
+
+	FieldSystem = CreateDefaultSubobject<UFieldSystemComponent>(FName("Field System"));
+	FieldSystem->SetupAttachment(GetRootComponent());
 }
 
 void AWeapon::BeginPlay()
@@ -74,9 +78,11 @@ void AWeapon::OnBoxBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor
 		IHitInterface* HitInterface = Cast<IHitInterface>(BoxHit.GetActor());
 		if (HitInterface)
 		{
-			HitInterface->GetHit(BoxHit.ImpactPoint);
+			HitInterface->Execute_GetHit(BoxHit.GetActor(), BoxHit.ImpactPoint);
 		}
 		IgnoreActor.AddUnique(BoxHit.GetActor());
+
+		CreateField(BoxHit.ImpactPoint);
 	}
 }
 
