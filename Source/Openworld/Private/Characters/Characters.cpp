@@ -11,6 +11,7 @@
 #include "Items/Weapons/Weapon.h"
 #include "Components/BoxComponent.h"
 #include "Animation/AnimMontage.h"
+#include "Particles/ParticleSystemComponent.h"
 
 ACharacters::ACharacters()
 {
@@ -37,6 +38,11 @@ ACharacters::ACharacters()
 
 	Eyebros = CreateDefaultSubobject<UGroomComponent>(FName("Eyebros"));
 	Eyebros->SetupAttachment(Head);
+
+	LeafEmitterComponent = CreateDefaultSubobject<UParticleSystemComponent>(FName("LeafEmitter"));
+	LeafEmitterComponent->SetupAttachment(GetMesh());
+
+	LeafEmitterComponent->SetUsingAbsoluteRotation(true);
 }
 
 void ACharacters::BeginPlay()
@@ -66,12 +72,18 @@ void ACharacters::AttackEnd()
 
 		PlayAttackMontage();
 	}
-	else
-	{
-		ActionState = EActionState::EAS_Unoccupied;
-		ComboStep = 0;
-		bComboQueued = false;
-	}
+}
+
+void ACharacters::AttackRecoveryEnd()
+{
+	ActionState = EActionState::EAS_Unoccupied;
+	ComboStep = 0;
+	bComboQueued = false;
+}
+
+void ACharacters::DashAttackEnd()
+{
+	ActionState = EActionState::EAS_Unoccupied;
 }
 
 void ACharacters::EquipEnd()
@@ -221,6 +233,15 @@ void ACharacters::Attack()
 	}
 }
 
+void ACharacters::DashAttack()
+{
+	if (CanAttack())
+	{
+		PlayDashAttackMontage();
+		ActionState = EActionState::EAS_Attacking;
+	}
+}
+
 void ACharacters::Dodge()
 {
 	if (CanDodge())
@@ -276,7 +297,7 @@ void ACharacters::PlayAttackMontage()
 	{
 		if (!AnimInstance->Montage_IsPlaying(AttackMontage))
 		{
-			AnimInstance->Montage_Play(AttackMontage, 1.75f);
+			AnimInstance->Montage_Play(AttackMontage);
 		}
 		FName SelectionName = FName();
 		switch (ComboStep)
@@ -294,6 +315,16 @@ void ACharacters::PlayAttackMontage()
 			break;
 		}
 		AnimInstance->Montage_JumpToSection(SelectionName, AttackMontage);
+	}
+}
+
+void ACharacters::PlayDashAttackMontage()
+{
+	UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
+	if (AnimInstance && DashAttackMontage)
+	{
+		AnimInstance->Montage_Play(DashAttackMontage);
+		AnimInstance->Montage_JumpToSection(FName("DashAttack"));
 	}
 }
 
@@ -350,6 +381,7 @@ void ACharacters::SetupPlayerInputComponent(UInputComponent* PlayerInputComponen
 		EnhancedInputComponent->BindAction(CharacterJumpAction, ETriggerEvent::Started, this, &ACharacters::Jump);
 		EnhancedInputComponent->BindAction(CharacterEquipAction, ETriggerEvent::Started, this, &ACharacters::Equip);
 		EnhancedInputComponent->BindAction(CharacterAttackAction, ETriggerEvent::Started, this, &ACharacters::Attack);
+		EnhancedInputComponent->BindAction(CharacterDashAttackAction, ETriggerEvent::Started, this, &ACharacters::DashAttack);
 		EnhancedInputComponent->BindAction(CharacterDodgeAction, ETriggerEvent::Started, this, &ACharacters::Dodge);
 	}
 }

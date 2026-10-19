@@ -13,6 +13,7 @@ class UCameraComponent;
 class UGroomComponent;
 class AItem;
 class AWeapon;
+class UParticleSystemComponent;
 
 UCLASS()
 class OPENWORLD_API ACharacters : public ACharacter
@@ -55,8 +56,17 @@ protected:
 	UPROPERTY(EditAnywhere, Category = "Input")
 	UInputAction* CharacterAttackAction;
 
+	UPROPERTY(EditAnywhere, Category = "Input")
+	UInputAction* CharacterDashAttackAction;
+
 	UFUNCTION(BlueprintCallable)
 	void AttackEnd();
+
+	UFUNCTION(BlueprintCallable)
+	void AttackRecoveryEnd();
+
+	UFUNCTION(BlueprintCallable)
+	void DashAttackEnd();
 
 	UFUNCTION(BlueprintCallable)
 	void EquipEnd(); 
@@ -76,7 +86,6 @@ protected:
 	UFUNCTION(BlueprintCallable)
 	void DodgeMovement(float DeltaTime);
 	
-
 	void Move(const FInputActionValue& Value);
 	void Run();
 	void Look(const FInputActionValue& Value);
@@ -84,6 +93,7 @@ protected:
 	virtual void Landed(const FHitResult& Hit) override;
 	void Equip();
 	void Attack();
+	void DashAttack();
 	void Dodge();
 	bool CanJump();
 	bool CanAttack();
@@ -93,6 +103,7 @@ protected:
 	bool CanDisArm();
 
 	void PlayAttackMontage();
+	void PlayDashAttackMontage();
 	void PlayEquipMontage(const FName& SectionName);
 	void PlayDodgeMontage();
 
@@ -143,10 +154,16 @@ private:
 	UAnimMontage* AttackMontage;
 
 	UPROPERTY(EditDefaultsOnly, Category = "Montages")
+	UAnimMontage* DashAttackMontage;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Montages")
 	UAnimMontage* EquipMontage;
 
 	UPROPERTY(EditDefaultsOnly, Category = "Montages")
 	UAnimMontage* DodgeMontage;
+
+	UPROPERTY(VisibleAnywhere)
+	UParticleSystemComponent* LeafEmitterComponent;
 
 	UPROPERTY(VisibleAnywhere)
 	bool bDodgeMovement = false;
