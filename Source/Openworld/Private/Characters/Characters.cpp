@@ -107,7 +107,7 @@ void ACharacters::Arm()
 {
 	if (EquippedWeapon)
 	{
-		EquippedWeapon->AttachMeahToSocket(GetMesh(), FName("RightHandSocket"));
+		EquippedWeapon->AttachMeshToSocket(GetMesh(), FName("RightHandSocket"));
 	}
 }
 
@@ -115,7 +115,7 @@ void ACharacters::DisArm()
 {
 	if (EquippedWeapon)
 	{
-		EquippedWeapon->AttachMeahToSocket(GetMesh(), FName("SpineSocket"));
+		EquippedWeapon->AttachMeshToSocket(GetMesh(), FName("SpineSocket"));
 	}
 }
 
@@ -189,14 +189,13 @@ void ACharacters::Landed(const FHitResult& Hit)
 
 void ACharacters::Equip()
 {
-	if (ActionState != EActionState::EAS_Unoccupied) return;
-	AWeapon* OverlappingWeapon = Cast<AWeapon>(OverlappingItem);
-	if (OverlappingWeapon)
+	if (OverlappingItem)
 	{
-		OverlappingWeapon->Equip(GetMesh(), FName("RightHandSocket"));
-		CharacterState = ECharacterState::ECS_EquippedOneHandedWeapon;
-		OverlappingItem = nullptr;
-		EquippedWeapon = OverlappingWeapon;
+		IEquipInterface* EquipInterface = Cast<IEquipInterface>(OverlappingItem);
+		if (EquipInterface)
+		{
+			EquipInterface->Execute_Equip(OverlappingItem, this);
+		}
 	}
 	else
 	{

@@ -24,6 +24,8 @@ public:
 	ACharacters();
 	virtual void Tick(float DeltaTime) override;
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
+
+	
 	
 	UFUNCTION(BlueprintCallable)
 	void SetWeaponCollisionEnable(ECollisionEnabled::Type CollisionEnable);
@@ -98,13 +100,12 @@ protected:
 	bool CanJump();
 	bool CanAttack();
 	bool CanDodge();
-
 	bool CanArm();
 	bool CanDisArm();
 
 	void PlayAttackMontage();
-	void PlayDashAttackMontage();
 	void PlayEquipMontage(const FName& SectionName);
+	void PlayDashAttackMontage();
 	void PlayDodgeMontage();
 
 	UPROPERTY(EditDefaultsOnly)
@@ -180,7 +181,12 @@ private:
 	bool bCanQueueCombo = false;
 public: 
 	FORCEINLINE void SetOverlappingItem(AItem* Item) { OverlappingItem = Item; }
+	FORCEINLINE AItem* GetOverlappingItem() const { return OverlappingItem; }
+	FORCEINLINE void SetEquippedWeapon(AWeapon* Weapon) { EquippedWeapon = Weapon; }
 	FORCEINLINE ECharacterState GetCharacterState() const { return CharacterState; }
+	FORCEINLINE EActionState GetActionState() const { return ActionState;  }
+	FORCEINLINE void SetCharacterState(const ECharacterState State) { CharacterState = State; }
+	FORCEINLINE void SetActionState(const EActionState State) { ActionState = State; }
 	
 	UFUNCTION(BlueprintCallable)
 	FORCEINLINE void SetCanQueueCombo(bool Status) { bCanQueueCombo = Status; }

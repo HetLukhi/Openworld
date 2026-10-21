@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Items/Item.h"
+#include "interfaces/EquipInterface.h"
 #include "Weapon.generated.h"
 
 class USoundBase;
@@ -11,14 +12,16 @@ class UBoxComponent;
 class UFieldSystemComponent;
 
 UCLASS()
-class OPENWORLD_API AWeapon : public AItem
+class OPENWORLD_API AWeapon : public AItem, public IEquipInterface
 {
 	GENERATED_BODY()
 
 public:
 	AWeapon();
-	void Equip(USceneComponent* InParent, FName InSocketName);
-	void AttachMeahToSocket(USceneComponent* InParent, const FName& InSocketName);
+	void Attach(USceneComponent* InParent, FName InSocketName);
+	void AttachMeshToSocket(USceneComponent* InParent, const FName& InSocketName);
+
+	virtual void Equip_Implementation(ACharacters* Character) override;
 
 	TArray<AActor*> IgnoreActor;
 

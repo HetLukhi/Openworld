@@ -86,9 +86,9 @@ void AWeapon::OnBoxBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor
 	}
 }
 
-void AWeapon::Equip(USceneComponent* InParent, FName InSocketName)
+void AWeapon::Attach(USceneComponent* InParent, FName InSocketName)
 {
-	AttachMeahToSocket(InParent, InSocketName);
+	AttachMeshToSocket(InParent, InSocketName);
 	ItemState = EItemState::EIS_Equipped;
 	if (EquipSound)
 	{
@@ -100,8 +100,24 @@ void AWeapon::Equip(USceneComponent* InParent, FName InSocketName)
 	}
 }
 
-void AWeapon::AttachMeahToSocket(USceneComponent* InParent, const FName& InSocketName)
+void AWeapon::AttachMeshToSocket(USceneComponent* InParent, const FName& InSocketName)
 {
 	FAttachmentTransformRules TransformRules(EAttachmentRule::SnapToTarget, true);
 	ItemMesh->AttachToComponent(InParent, TransformRules, InSocketName);
+}
+
+void AWeapon::Equip_Implementation(ACharacters* Character)
+{
+	if (Character)
+	{
+		EActionState ActionState = Character->GetActionState();
+		AItem* OverlappingItem = Character->GetOverlappingItem();
+
+		if (ActionState != EActionState::EAS_Unoccupied) return;
+			Attach(Character->GetMesh(), FName("RightHandSocket"));
+			Character->SetCharacterState(ECharacterState::ECS_EquippedOneHandedWeapon);
+			Character->SetOverlappingItem(nullptr);
+			Character->SetEquippedWeapon(this);
+	
+	}
 }
