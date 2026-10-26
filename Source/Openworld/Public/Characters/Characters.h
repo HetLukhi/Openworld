@@ -24,8 +24,6 @@ public:
 	ACharacters();
 	virtual void Tick(float DeltaTime) override;
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
-
-	
 	
 	UFUNCTION(BlueprintCallable)
 	void SetWeaponCollisionEnable(ECollisionEnabled::Type CollisionEnable);
@@ -84,9 +82,6 @@ protected:
 
 	UFUNCTION(BlueprintCallable)
 	void DisArm();
-
-	UFUNCTION(BlueprintCallable)
-	void DodgeMovement(float DeltaTime);
 	
 	void Move(const FInputActionValue& Value);
 	void Run();
@@ -113,18 +108,6 @@ protected:
 
 	UPROPERTY(EditDefaultsOnly)
 	float MaxRunSpeed = 600.0f;
-
-	UPROPERTY(EditDefaultsOnly)
-	float WalkDodgeSpeed = 250.0f;
-
-	UPROPERTY(EditDefaultsOnly)
-	float RunDodgeSpeed = 450.0f;
-
-	UPROPERTY(EditDefaultsOnly)
-	float DodgeSpeed = 0.0f;
-
-	UPROPERTY(EditDefaultsOnly)
-	float DodgeDuration = 1.0f;
 
 private:
 	ECharacterState CharacterState = ECharacterState::ECS_Unequipped;
@@ -166,19 +149,32 @@ private:
 	UPROPERTY(VisibleAnywhere)
 	UParticleSystemComponent* LeafEmitterComponent;
 
-	UPROPERTY(VisibleAnywhere)
-	bool bDodgeMovement = false;
-
-	float DodgeTime = 0.0f;
-
-	FVector DodgeDirection = FVector::ZeroVector;
-
 	int32 ComboStep = 0;
 
 	bool bComboQueued = false;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Combat", meta = (AllowPrivateAccess = "true"))
 	bool bCanQueueCombo = false;
+
+	UPROPERTY(VisibleAnywhere, Category = "Combat")
+	FVector2D CachedMoveInput = FVector2D::ZeroVector;
+
+	UPROPERTY(VisibleAnywhere, Category = "Combat")
+	FVector AttackSteeringDirection = FVector::ZeroVector;
+
+	UPROPERTY(VisibleAnywhere, Category = "Combat")
+	bool bCanSteerDuringAttack = false;
+
+	UFUNCTION(BlueprintCallable, Category = "Combat")
+	void BeginAttackSteering();
+
+	UFUNCTION(BlueprintCallable, Category = "Combat")
+	void UpdateAttackSteering();
+
+	UFUNCTION(BlueprintCallable, Category = "Combat")
+	void ApplyAttackSteeringDirection();
+
+
 public: 
 	FORCEINLINE void SetOverlappingItem(AItem* Item) { OverlappingItem = Item; }
 	FORCEINLINE AItem* GetOverlappingItem() const { return OverlappingItem; }

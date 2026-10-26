@@ -8,7 +8,7 @@ public class Openworld : ModuleRules
 	{
 		PCHUsage = PCHUsageMode.UseExplicitOrSharedPCHs;
 	
-		PublicDependencyModuleNames.AddRange(new string[] { "Core", "CoreUObject", "Engine", "InputCore", "EnhancedInput", "HairStrandsCore", "FieldSystemEngine", "GeometryCollectionEngine" });
+		PublicDependencyModuleNames.AddRange(new string[] { "Core", "CoreUObject", "Engine", "InputCore", "EnhancedInput", "HairStrandsCore", "FieldSystemEngine", "GeometryCollectionEngine", "Niagara" });
 
 		PrivateDependencyModuleNames.AddRange(new string[] {  });
 

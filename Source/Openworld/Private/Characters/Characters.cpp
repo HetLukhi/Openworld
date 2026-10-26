@@ -119,27 +119,16 @@ void ACharacters::DisArm()
 	}
 }
 
-void ACharacters::DodgeMovement(float DeltaTime)
-{
-	FVector Movement = DodgeDirection * DodgeSpeed * DeltaTime;
-
-	AddActorWorldOffset(Movement, true);
-
-	DodgeTime += DeltaTime;
-
-	if (DodgeTime >= DodgeDuration)
-	{
-		bDodgeMovement = false;
-	}
-}
-
 void ACharacters::Move(const FInputActionValue& Value)
 {
+	const FVector2D MovementVector = Value.Get<FVector2D>();
+	CachedMoveInput = MovementVector;
+
 	if (ActionState != EActionState::EAS_Unoccupied) return;
 	if (Controller && Value.IsNonZero())
 	{
 		GetCharacterMovement()->MaxWalkSpeed = 250.0f;
-		const FVector2D MovementVector = Value.Get<FVector2D>();
+		
 
 		const FRotator ControlRotation = GetControlRotation();
 		const FRotator YawRotation(0.0f, ControlRotation.Yaw, 0.0f);
@@ -245,18 +234,8 @@ void ACharacters::Dodge()
 {
 	if (CanDodge())
 	{
-		DodgeDirection = GetLastMovementInputVector();
-		if (DodgeDirection.IsNearlyZero())
-		{
-			DodgeDirection = GetActorForwardVector();
-		}
-		DodgeDirection.Normalize();
-
 		PlayDodgeMontage();
 		ActionState = EActionState::EAS_Dodgeing;
-
-		DodgeTime = 0.0f;
-		bDodgeMovement = true;
 	}
 }
 
@@ -345,27 +324,63 @@ void ACharacters::PlayDodgeMontage()
 		float Velocity = GetVelocity().Size2D();
 		if (Velocity <= MaxWalkSpeed)
 		{
-			DodgeSpeed = 350.0f;
 			AnimInstance->Montage_Play(DodgeMontage);
 			AnimInstance->Montage_JumpToSection(FName("WalkingDodge"));
 
 		}
 		else if (Velocity <= MaxRunSpeed)
 		{
-			DodgeSpeed = 450.0f;
 			AnimInstance->Montage_Play(DodgeMontage);
 			AnimInstance->Montage_JumpToSection(FName("RunningDodge"));
 		}
 	}
 }
 
+void ACharacters::BeginAttackSteering()
+{
+	bCanSteerDuringAttack = true;
+	AttackSteeringDirection = FVector::ZeroVector;
+}
+
+void ACharacters::UpdateAttackSteering()
+{
+	if (!bCanSteerDuringAttack) return;
+
+	const FVector2D MovementVector = CachedMoveInput;
+
+	if (MovementVector.IsNearlyZero()) return;
+
+	const FRotator ControlRotation = GetControlRotation();
+	const FRotator YawRotation(0.0f, ControlRotation.Yaw, 0.0f);
+
+	const FVector ForwardDirection =
+		FRotationMatrix(YawRotation).GetUnitAxis(EAxis::X);
+
+	const FVector RightDirection =
+		FRotationMatrix(YawRotation).GetUnitAxis(EAxis::Y);
+
+	FVector AttackDirection =
+		ForwardDirection * MovementVector.Y +
+		RightDirection * MovementVector.X;
+
+	AttackDirection.Normalize();
+
+	AttackSteeringDirection = AttackDirection;
+}
+
+void ACharacters::ApplyAttackSteeringDirection()
+{
+	bCanSteerDuringAttack = false;
+
+	if (AttackSteeringDirection.IsNearlyZero()) return;
+
+	SetActorRotation(AttackSteeringDirection.Rotation());
+}
+
 void ACharacters::Tick(float DeltaTime) 
 {
 	Super::Tick(DeltaTime);
-	if (bDodgeMovement)
-	{
-		DodgeMovement(DeltaTime);
-	}
+
 }
 
 void ACharacters::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
